@@ -1,5 +1,7 @@
 package addtasks.ui
 
+import addtasks.ui.model.TaskModel
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,6 +15,8 @@ class TaskViewModel @Inject constructor():ViewModel() {
     val showDialog: LiveData<Boolean> = _showDialog
     private val _myTaskText = MutableLiveData<String>()
     val myTaskText: LiveData<String> = _myTaskText
+    private val _tasks = mutableStateListOf<TaskModel>()
+    val tasks: List<TaskModel> = _tasks
 
     fun onDialogClose(){
         _showDialog.value = false
@@ -20,6 +24,7 @@ class TaskViewModel @Inject constructor():ViewModel() {
 
     fun onTaskCreated(){
         onDialogClose()
+        _tasks.add(TaskModel(task = _myTaskText.value ?: ""))
         _myTaskText.value = ""
     }
 
@@ -29,4 +34,15 @@ class TaskViewModel @Inject constructor():ViewModel() {
     fun onTaskTextChanged(taskText:String){
         _myTaskText.value = taskText
     }
+
+    fun onItemRemove(taskModel: TaskModel) {
+        val task = _tasks.find { it.id == taskModel.id }
+        _tasks.remove(task)
+    }
+
+    fun onCheckBoxSelected(taskModel: TaskModel) {
+        val index = _tasks.indexOf(taskModel)
+        _tasks[index] = _tasks[index].let { it.copy(selected = !it.selected) }
+    }
+
 }
